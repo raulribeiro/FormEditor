@@ -271,6 +271,7 @@
     <Compile Include="Fields\InvisibleReCaptchaField.cs" />
     <Compile Include="Fields\MailChimpSubscriptionField.cs" />
     <Compile Include="Fields\CustomFieldFixedValues.cs" />
+    <Compile Include="Fields\MemberAttributeField.cs" />
     <Compile Include="Fields\NewsletterSubscriptionField.cs" />
     <Compile Include="Fields\Statistics\FieldExtensions.cs" />
     <Compile Include="Fields\Statistics\IValueFrequencyStatisticsField.cs" />
