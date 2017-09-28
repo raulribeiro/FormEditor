@@ -82,7 +82,7 @@ namespace FormEditor.Api
 			}
 			else
 			{
-				var result = index.Get("_created", false, 100000, 0);
+				var result = index.Get(null, null,"_created", false, 100000, 0);
 				if (result != null && result.Rows != null)
 				{
 					rows = result.Rows.ToList();

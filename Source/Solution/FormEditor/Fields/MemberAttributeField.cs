@@ -5,8 +5,8 @@ using Umbraco.Web;
 
 namespace FormEditor.Fields
 {
-	public class MemberAttributeField : FieldWithPlaceholder
-	{
+	public class MemberAttributeField : FieldWithValue
+    {
 		public override string Type
 		{
 			get { return "core.memberattribute"; }
@@ -20,20 +20,32 @@ namespace FormEditor.Fields
         public string AttributeName { get; set; }
 
         protected internal override void CollectSubmittedValue(Dictionary<string, string> allSubmittedValues, IPublishedContent content)
-		{
-			// get the logged in member (if any)
-			var member = CurrentMember();
-			if (member == null)
-			{
-				// no member logged in
-				base.CollectSubmittedValue(allSubmittedValues, content);
-				return;
-			}
-            // gather member data for index
-            SubmittedValue = (string)member.Properties[AttributeName].Value;
-		}
+        {
+            // get the logged in member (if any)
+            var member = CurrentMember();
+            if (member == null)
+            {
+                // no member logged in
+                base.CollectSubmittedValue(allSubmittedValues, content);
+                return;
+            }
 
-		private IMember CurrentMember()
+            Log.Info("AttributeName =" + AttributeName, null);
+
+
+            if (!string.IsNullOrEmpty((string)AttributeName)) {
+                if (AttributeName == "Username")
+                    SubmittedValue = member.Username;
+                else if (!string.IsNullOrEmpty((string)member.GetValue(AttributeName)))
+                    SubmittedValue = (string)member.GetValue(AttributeName);
+                else
+                    SubmittedValue = "";
+            }
+
+            Log.Info("SubmittedValue =" + SubmittedValue, null);
+        }
+
+        private IMember CurrentMember()
 		{
 			var user = UmbracoContext.Current.HttpContext.User;
 			var identity = user != null ? user.Identity : null;
@@ -46,5 +58,24 @@ namespace FormEditor.Fields
 		{
 			get { return CurrentMember() != null; }
 		}
-	}
+
+        #region Format value for various display scenarios
+
+        protected internal override string FormatValueForDataView(string value, IContent content, Guid rowId)
+        {
+            return base.FormatValueForDataView(value, content, rowId);
+        }
+
+        protected internal override string FormatValueForCsvExport(string value, IContent content, Guid rowId)
+        {
+            return base.FormatValueForCsvExport(value, content, rowId);
+        }
+
+        protected internal override string FormatValueForFrontend(string value, IPublishedContent content, Guid rowId)
+        {
+            return base.FormatValueForFrontend(value, content, rowId);
+        }
+        
+        #endregion
+    }
 }

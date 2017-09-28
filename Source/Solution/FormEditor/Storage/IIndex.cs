@@ -46,7 +46,7 @@ namespace FormEditor.Storage
 		/// <param name="count">The number of entries to return</param>
 		/// <param name="skip">The number of entries to skip (for pagination)</param>
 		/// <returns>The matching entries</returns>
-		Result Get(string sortField, bool sortDescending, int count, int skip);
+		Result Get(string searchQuery, string[] searchFields, string sortField, bool sortDescending, int count, int skip);
 
 		/// <summary>
 		/// Saves an uploaded file to the index

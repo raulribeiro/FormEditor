@@ -190,7 +190,7 @@ namespace FormEditor.Api
 			var fullTextIndex = index as IFullTextIndex;
 			var result = (fullTextIndex != null && string.IsNullOrWhiteSpace(searchQuery) == false
 					? fullTextIndex.Search(searchQuery, allFields.Select(f => f.FormSafeName).ToArray(), sortField, sortDescending, PerPage, (page - 1) * PerPage)
-					: index.Get(sortField, sortDescending, PerPage, (page - 1) * PerPage) 
+					: index.Get(searchQuery, null,sortField, sortDescending, PerPage, (page - 1) * PerPage) 
 				) ?? Result.Empty(sortField, sortDescending);
 			var totalPages = (int)Math.Ceiling((double)result.TotalRows / PerPage);
 
@@ -199,7 +199,7 @@ namespace FormEditor.Api
 			{
 				// repeat the query but get the last page
 				page = totalPages;
-				result = index.Get(sortField, sortDescending, PerPage, (page - 1) * PerPage);
+				result = index.Get(searchQuery, null,sortField, sortDescending, PerPage, (page - 1) * PerPage);
 			}
 
 			var rows = model.ExtractSubmittedValues(result, allFields, (field, value, row) => field.FormatValueForDataView(value, document, row.Id));

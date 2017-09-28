@@ -16,7 +16,7 @@ namespace FormEditor.Storage
 		/// <param name="skip">The number of entries to skip (for pagination)</param>
 		/// <param name="approvalState">The approval state of the entries - if the value is ApprovalState.Any, no approval filtering is applied</param>
 		/// <returns>The matching entries</returns>
-		Result Get(string sortField, bool sortDescending, int count, int skip, ApprovalState approvalState);
+		Result Get(string searchQuery, string[] searchFields, string sortField, bool sortDescending, int count, int skip, ApprovalState approvalState);
 
 		/// <summary>
 		/// Sets the approval state of an entry in the index

@@ -187,14 +187,14 @@ namespace FormEditor.Storage
 			return rows;
 		}
 
-		public Result Get(string sortField, bool sortDescending, int count, int skip)
+		public Result Get(string searchQuery, string[] searchFields, string sortField, bool sortDescending, int count, int skip)
 		{
-			return GetSearchResults(null, null, sortField, sortDescending, count, skip);
+			return GetSearchResults(searchQuery, searchFields, sortField, sortDescending, count, skip);
 		}
 
-		public Result Get(string sortField, bool sortDescending, int count, int skip, ApprovalState approvalState)
+		public Result Get(string searchQuery, string[] searchFields, string sortField, bool sortDescending, int count, int skip, ApprovalState approvalState)
 		{
-			return GetSearchResults(null, null, sortField, sortDescending, count, skip, approvalState);
+			return GetSearchResults(searchQuery, searchFields, sortField, sortDescending, count, skip, approvalState);
 		}
 
 		public Result Search(string searchQuery, string[] searchFields, string sortField, bool sortDescending, int count, int skip)
@@ -251,19 +251,30 @@ namespace FormEditor.Storage
 			}
 
 			Query query;
-			if(string.IsNullOrWhiteSpace(searchQuery) == false && searchFields != null && searchFields.Any())
+
+            if (string.IsNullOrWhiteSpace(searchQuery) == false && searchFields != null && searchFields.Any())
 			{
-				searchQuery = searchQuery.Replace("*", "").Replace(" ", "* ") + "*";
-				var parser = new MultiFieldQueryParser(Version.LUCENE_29, searchFields, GetAnalyzer());
-				parser.SetDefaultOperator(QueryParser.Operator.AND);
-				try
-				{
-					query = parser.Parse(searchQuery.Trim());
-				}
-				catch(ParseException)
-				{
-					query = parser.Parse(QueryParser.Escape(searchQuery.Trim()));
-				}
+				//searchQuery = searchQuery.Replace("*", "").Replace(" ", "* ") + "*";
+                if (searchFields.Count() > 1)
+                {
+                    var parser = new MultiFieldQueryParser(Version.LUCENE_29, searchFields, GetAnalyzer());
+                    parser.SetDefaultOperator(QueryParser.Operator.AND);
+                    Log.Info("searchQuery =" + searchQuery, null);
+
+                    try
+                    {
+                        query = parser.Parse(searchQuery.Trim());
+                    }
+                    catch (ParseException ex)
+                    {
+                        Log.Error(ex, ex.Message, null);
+
+                        query = parser.Parse(QueryParser.Escape(searchQuery.Trim()));
+                    }
+                }
+                else {
+                    query = new QueryParser(Version.LUCENE_29, searchFields.FirstOrDefault(), GetAnalyzer()).Parse(searchQuery);
+                }
 			}
 			else
 			{
@@ -432,7 +443,9 @@ namespace FormEditor.Storage
 			var fields = new Dictionary<string, string>();
 			foreach (var field in doc.GetFields().OfType<LuceneField>().Where(f => f.Name() != IdField && f.Name() != CreatedField))
 			{
-				fields[field.Name()] = field.StringValue();
+                Log.Info("Field Name =" + field.Name(), null);
+
+                fields[field.Name()] = field.StringValue();
 			}
 			return new Row(id, createdDate, fields, approvalState);
 		}

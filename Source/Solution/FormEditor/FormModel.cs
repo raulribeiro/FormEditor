@@ -201,7 +201,8 @@ namespace FormEditor
 			return true;
 		}
 
-		public FormData GetSubmittedValues(int page = 1, int perPage = 10, string sortField = null, bool sortDescending = false, ApprovalState approvalState = ApprovalState.Approved)
+		public FormData GetSubmittedValues(int page = 1, int perPage = 10, string sortField = null, bool sortDescending = false, 
+            ApprovalState approvalState = ApprovalState.Approved)
 		{
 			if(RequestedContent == null)
 			{
@@ -210,8 +211,48 @@ namespace FormEditor
 			return GetSubmittedValues(RequestedContent, page, perPage, sortField, sortDescending, approvalState);
 		}
 
-		public FormData GetSubmittedValues(IPublishedContent content, int page = 1, int perPage = 10, string sortField = null, bool sortDescending = false, ApprovalState approvalState = ApprovalState.Approved)
-		{
+        public FormData GetSubmittedValuesFilterByUserAttribute(IPublishedContent content, int page = 1, int perPage = 10, string sortField = null,
+            bool sortDescending = false, ApprovalState approvalState = ApprovalState.Approved, string userAttribute = null, string formAttribute = null)
+        {
+            string query = null;
+            string[] queryFields = null;
+
+            if (!string.IsNullOrEmpty(userAttribute)) {
+                query = CreateUserAttributeQuery(userAttribute);
+                queryFields = new[] { formAttribute };
+            }
+
+            return GetSubmittedValues(content, page, perPage, sortField, sortDescending, approvalState, query, queryFields);
+        }
+
+        private string CreateUserAttributeQuery(string userAttribute) {
+
+            string query = null;
+
+            var member = CurrentMember();
+
+            if (userAttribute == "Username")
+                query = member.Username;
+            else if (!string.IsNullOrEmpty((string)member.GetValue(userAttribute))) {
+                query = (string)member.GetValue(userAttribute);
+            }
+
+            return query;
+        }
+
+        private IMember CurrentMember()
+        {
+            var user = UmbracoContext.Current.HttpContext.User;
+            var identity = user != null ? user.Identity : null;
+            return identity != null && string.IsNullOrWhiteSpace(identity.Name) == false
+                ? UmbracoContext.Current.Application.Services.MemberService.GetByUsername(identity.Name)
+                : null;
+        }
+
+        public FormData GetSubmittedValues(IPublishedContent content, int page = 1, int perPage = 10, string sortField = null, 
+            bool sortDescending = false, ApprovalState approvalState = ApprovalState.Approved, string searchQuery = null, string[] searchFields = null)
+
+        {
 			var index = IndexHelper.GetIndex(content.Id);
 
 			IApprovalIndex approvalIndex = null;
@@ -223,8 +264,8 @@ namespace FormEditor
 			}
 
 			var result = approvalIndex != null
-				? approvalIndex.Get(sortField, sortDescending, perPage, (page - 1) * perPage, approvalState)
-				: index.Get(sortField, sortDescending, perPage, (page - 1) * perPage); 
+				? approvalIndex.Get(searchQuery, searchFields, sortField, sortDescending, perPage, (page - 1) * perPage, approvalState)
+				: index.Get(searchQuery, searchFields, sortField, sortDescending, perPage, (page - 1) * perPage); 
 			result = result ?? Result.Empty(sortField, sortDescending);
 
 			var fields = AllValueFields().ToArray();
