@@ -233,6 +233,10 @@ namespace FormEditor
 
             if (userAttribute == "Username")
                 query = member.Username;
+            else if (userAttribute == "Useremail")
+                query = member.Email;
+            else if (userAttribute == "Userid")
+                query = member.Id.ToString();
             else if (!string.IsNullOrEmpty((string)member.GetValue(userAttribute))) {
                 query = (string)member.GetValue(userAttribute);
             }

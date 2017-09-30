@@ -36,6 +36,10 @@ namespace FormEditor.Fields
             if (!string.IsNullOrEmpty((string)AttributeName)) {
                 if (AttributeName == "Username")
                     SubmittedValue = member.Username;
+                else if (AttributeName == "Useremail")
+                    SubmittedValue = member.Email;
+                else if (AttributeName == "Userid")
+                    SubmittedValue = member.Id.ToString();
                 else if (!string.IsNullOrEmpty((string)member.GetValue(AttributeName)))
                     SubmittedValue = (string)member.GetValue(AttributeName);
                 else
